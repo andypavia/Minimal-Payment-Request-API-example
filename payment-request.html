@@ -1,0 +1,51 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <button id="buy">Buy</butoon>
+    <script>
+      function clickBuy() {
+        var methodData = [
+          {
+            supportedMethods: ["visa"]
+          }
+        ];
+        var details = {
+          displayItems: [
+            {
+              label: "Sub-total",
+              amount: { currency: "USD", value : "55.00" }, // US$55.00
+            },
+            {
+              label: "Sales Tax",
+              amount: { currency: "USD", value : "5.00" }, // US$5.00
+            }
+          ],
+          total:  {
+            label: "Total due",
+            amount: { currency: "USD", value : "60.00" }, // US$60.00
+          }
+        };
+        var options = {
+          requestShipping: true
+        };
+        var payment = new PaymentRequest(methodData, details, options);
+        payment.addEventListener("shippingaddresschange", function (changeEvent) {
+            // Process shipping address change
+            console.log('shipping address changed', changeEvent);
+        });
+
+        payment.show().then(function(paymentResponse) {
+          console.log('promise was fulfilled')
+          // Process paymentResponse
+          // paymentResponse.methodName contains the selected payment method
+          // paymentResponse.details contains a payment method specific response
+          paymentResponse.complete("success");
+        }).catch(function(err) {
+          console.error("Uh oh, something bad happened", err.message);
+        });
+      }
+      document.getElementById('buy').addEventListener('click', clickBuy)
+    </script>
+  </body>
+</html>
