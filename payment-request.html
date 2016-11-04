@@ -2,50 +2,67 @@
   <head>
   </head>
   <body>
-    <button id="buy">Buy</butoon>
+    <button id="checkout">Buy</butoon>
     <script>
-      function clickBuy() {
+      function() startPaymentRequestCheckout {
         var methodData = [
           {
-            supportedMethods: ["visa"]
+            supportedMethods: ['basic-card'],
+            data: {
+              supportedNetworks: ['visa', 'mastercard', 'amex'],
+              supportedTypes: ['credit']
+            }
           }
         ];
-        var details = {
+
+        var details =  {
           displayItems: [
             {
               label: "Sub-total",
-              amount: { currency: "USD", value : "55.00" }, // US$55.00
+              amount: { currency: "USD", value : "100.00" }, // US$100.00
             },
             {
               label: "Sales Tax",
-              amount: { currency: "USD", value : "5.00" }, // US$5.00
+              amount: { currency: "USD", value : "9.00" }, // US$9.00
             }
           ],
           total:  {
             label: "Total due",
-            amount: { currency: "USD", value : "60.00" }, // US$60.00
+            amount: { currency: "USD", value : "109.00" }, // US$109.00
           }
         };
-        var options = {
-          requestShipping: true
-        };
-        var payment = new PaymentRequest(methodData, details, options);
-        payment.addEventListener("shippingaddresschange", function (changeEvent) {
-            // Process shipping address change
-            console.log('shipping address changed', changeEvent);
-        });
 
-        payment.show().then(function(paymentResponse) {
-          console.log('promise was fulfilled')
-          // Process paymentResponse
-          // paymentResponse.methodName contains the selected payment method
-          // paymentResponse.details contains a payment method specific response
-          paymentResponse.complete("success");
-        }).catch(function(err) {
-          console.error("Uh oh, something bad happened", err.message);
+        var options = {
+          requestShipping: true 
+        };
+
+        //constructor
+        var request = new PaymentRequest(methodData, details, options);
+
+        //Show the Native UI
+        request.show()
+
+        //When the promise is fulfilled, pass the results to your server for processing
+        .then(result => {
+          return process(result).then(response => {
+            // Examine server response
+            if (response.status === 200) {
+              //Show that the transaction was successful in the UI
+              return result.complete('success');
+            } else {
+              //Show in the Native UI that the transaction failed
+              return result.complete('fail');
+            }
+          })
+        });
+        request.addEventListener("shippingaddresschange", function (changeEvent) {
+          // Process shipping address change
+        });
+        request.addEventListener("onshippingoptionchange", function (changeEvent) {
+          // Process shipping option change (e.g. "one day shipping")
         });
       }
-      document.getElementById('buy').addEventListener('click', clickBuy)
+      document.getElementById('#checkout').addEventListener('click', startPaymentRequestCheckout)
     </script>
   </body>
 </html>
